@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "center-multi-agent-backend"
-version = "0.1.0"
+version = "0.2.0"
 description = "Center Multi-Agent Backend"
 authors = ["Kim Hsiao"]
 readme = "README.md"
