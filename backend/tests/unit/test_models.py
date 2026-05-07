@@ -17,7 +17,13 @@ def test_organization_model_creation():
 
 def test_organization_default_timestamps():
     from app.models.organization import Organization
-    org = Organization(name="Test", slug="test-" + str(uuid4())[:8])
+    from datetime import datetime, timezone
+    org = Organization(
+        name="Test",
+        slug="test-" + str(uuid4())[:8],
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
     assert org.created_at is not None
     assert org.updated_at is not None
 
