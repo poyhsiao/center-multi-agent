@@ -66,6 +66,12 @@ def create_app() -> FastAPI:
     except ImportError:
         pass
 
+    try:
+        from app.api.v1 import rag
+        app.include_router(rag.router, prefix="/api/v1", tags=["rag"])
+    except ImportError:
+        pass
+
     return app
 
 
