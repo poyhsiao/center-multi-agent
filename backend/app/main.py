@@ -72,6 +72,12 @@ def create_app() -> FastAPI:
     except ImportError:
         pass
 
+    try:
+        from app.api.v1 import sync
+        app.include_router(sync.router, prefix="/api/v1", tags=["sync"])
+    except ImportError:
+        pass
+
     return app
 
 
