@@ -1,6 +1,5 @@
 """Tenant Service - Organization, Department, User CRUD and RBAC Engine."""
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
