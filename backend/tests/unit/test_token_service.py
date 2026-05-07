@@ -97,3 +97,56 @@ class TestJWTOperations:
         # Create a token that's already expired (exp = now - 1 second)
         with pytest.raises(TokenExpiredException):
             verify_access_token("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImV4cCI6MTYwMDAwMDAwMH0.fake")
+
+
+class TestFingerprintGeneration:
+    """Test device fingerprint generation."""
+
+    def test_fingerprint_generation_consistency(self):
+        """Same inputs should produce same fingerprint."""
+        from app.core.fingerprint import generate_fingerprint
+
+        fp1 = generate_fingerprint(
+            user_agent="Mozilla/5.0",
+            client_version="1.0.0",
+            client_type="web",
+        )
+
+        fp2 = generate_fingerprint(
+            user_agent="Mozilla/5.0",
+            client_version="1.0.0",
+            client_type="web",
+        )
+
+        assert fp1 == fp2
+
+    def test_fingerprint_different_inputs_different_output(self):
+        """Different inputs should produce different fingerprints."""
+        from app.core.fingerprint import generate_fingerprint
+
+        fp1 = generate_fingerprint(
+            user_agent="Mozilla/5.0",
+            client_version="1.0.0",
+            client_type="web",
+        )
+
+        fp2 = generate_fingerprint(
+            user_agent="Chrome/120.0",
+            client_version="1.0.0",
+            client_type="web",
+        )
+
+        assert fp1 != fp2
+
+    def test_fingerprint_is_sha256_hash(self):
+        """Fingerprint should be a SHA256 hex string."""
+        from app.core.fingerprint import generate_fingerprint
+
+        fp = generate_fingerprint(
+            user_agent="Mozilla/5.0",
+            client_version="1.0.0",
+            client_type="web",
+        )
+
+        assert len(fp) == 64  # SHA256 hex = 64 characters
+        assert all(c in "0123456789abcdef" for c in fp)
