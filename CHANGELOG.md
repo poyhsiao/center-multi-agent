@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-05-08
+
+### Added
+- **Structured Logging** - structlog-based JSON logging with timestamps, service info, and correlation IDs
+- **Request Logging Middleware** - HTTP request/response logging with timing and X-Request-ID headers
+- **Security Headers Middleware** - TrustedHostMiddleware and CORS middleware stack
+- **Rate Limiting Middleware** - Redis-based rate limiting (60 req/min default, configurable)
+- **WebSocket Endpoint** - Real-time bidirectional communication at `/api/v1/ws`
+- **Enhanced Health Check** - Health endpoint with detailed status reporting
+
+### Changed
+- **Dependencies** - Added structlog ^24.1 for production-ready structured logging
+
 ## [0.2.0] - 2026-05-07
 
 ### Added

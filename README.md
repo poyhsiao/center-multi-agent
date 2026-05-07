@@ -30,6 +30,14 @@ center-multi-agent/
 - 4 Gherkin features with 24 scenarios
 - Login flow, Agent operations, Knowledge contribution, Client sync
 
+### Phase 6: Production Hardening
+- Structured logging with structlog (JSON format, correlation IDs)
+- Request logging middleware with timing
+- Security middleware (TrustedHost, CORS)
+- Redis-based rate limiting (60 req/min)
+- WebSocket endpoint for real-time communication
+- Enhanced health check with service status
+
 ## Quick Start
 
 ### Prerequisites
@@ -58,7 +66,7 @@ JWT_SECRET=your-secret-key
 ## Testing
 
 ```bash
-# Unit tests (90 tests)
+# Unit tests (124 tests)
 poetry run pytest tests/unit/ -v
 
 # Integration tests (4 tests, requires Redis)
