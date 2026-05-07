@@ -27,11 +27,15 @@ export async function checkSync(request: SyncRequest): Promise<SyncResponse> {
     body: JSON.stringify(request),
   });
 
+  if (!response.ok) {
+    throw new Error(`Sync check failed: ${response.status}`);
+  }
+
   return response.json();
 }
 
 export async function uploadSettings(settings: Record<string, unknown>): Promise<void> {
-  await fetch(`${SYNC_ENDPOINT}/settings`, {
+  const response = await fetch(`${SYNC_ENDPOINT}/settings`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -39,4 +43,8 @@ export async function uploadSettings(settings: Record<string, unknown>): Promise
     },
     body: JSON.stringify({ settings }),
   });
+
+  if (!response.ok) {
+    throw new Error(`Settings upload failed: ${response.status}`);
+  }
 }
