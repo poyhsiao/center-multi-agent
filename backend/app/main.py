@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
             {"name": "health", "description": "Health check endpoints"},
             {"name": "auth", "description": "Authentication and authorization"},
             {"name": "knowledge", "description": "Knowledge management"},
+            {"name": "agent", "description": "Agent operations with SSE notifications"},
         ],
         lifespan=lifespan,
     )
@@ -45,15 +46,24 @@ def create_app() -> FastAPI:
         """Health check endpoint."""
         return {"status": "healthy"}
 
-    # Import and include routers from api/v1 (auth, knowledge)
-    # These modules are created in separate tasks
+    # Import and include routers from api/v1
+    # Note: agent router is self-contained; auth/knowledge may have import errors
     try:
-        from app.api.v1 import auth, knowledge
+        from app.api.v1 import agent
+        app.include_router(agent.router, prefix="/api/v1", tags=["agent"])
+    except ImportError:
+        pass
 
+    try:
+        from app.api.v1 import auth
         app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
+    except ImportError:
+        pass
+
+    try:
+        from app.api.v1 import knowledge
         app.include_router(knowledge.router, prefix="/api/v1", tags=["knowledge"])
     except ImportError:
-        # Routers not yet implemented
         pass
 
     return app
