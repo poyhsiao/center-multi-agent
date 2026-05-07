@@ -41,7 +41,7 @@ def create_app() -> FastAPI:
     # Security middleware - TrustedHostMiddleware
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["localhost", "127.0.0.1", "*.example.com"],
+        allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.example.com"],
     )
 
     # CORS middleware
@@ -91,6 +91,12 @@ def create_app() -> FastAPI:
     try:
         from app.api.v1 import sync
         app.include_router(sync.router, prefix="/api/v1", tags=["sync"])
+    except ImportError:
+        pass
+
+    try:
+        from app.api.v1 import ws
+        app.include_router(ws.router, prefix="/api/v1", tags=["ws"])
     except ImportError:
         pass
 
