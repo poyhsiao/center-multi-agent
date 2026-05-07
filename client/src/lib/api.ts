@@ -44,10 +44,13 @@ export async function refreshToken(refreshToken: string): Promise<LoginResponse>
 }
 
 export async function logout(accessToken: string): Promise<void> {
-  await fetch(`${API_BASE}/api/v1/auth/logout`, {
+  const response = await fetch(`${API_BASE}/api/v1/auth/logout`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },
   });
+  if (!response.ok) {
+    throw new Error(`Logout failed: ${response.status}`);
+  }
 }
