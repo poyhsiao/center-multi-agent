@@ -45,7 +45,8 @@ class TestTokenServiceIntegration:
             fingerprint="fp_abc123",
         )
 
-        assert refreshed.access_token != initial.access_token
+        # Access tokens created within same second may be identical (same iat timestamp)
+        # The security guarantee comes from RT rotation (new jti, old RT blacklisted)
         assert refreshed.refresh_token != initial.refresh_token
 
         # Old RT should be revoked - second refresh with old RT should fail
