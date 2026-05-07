@@ -11,7 +11,12 @@ const AUTH_STORAGE_KEY = 'auth_state';
 
 export function getStoredAuth(): AuthState | null {
   const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-  return stored ? JSON.parse(stored) : null;
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return null;
+  }
 }
 
 export function saveAuth(auth: AuthState): void {
@@ -52,9 +57,13 @@ export async function ensureValidToken(): Promise<string | null> {
   const auth = getStoredAuth();
   if (!auth) return null;
 
-  // Check if expired
-  if (Date.now() >= auth.expiresAt - 60000) {
+  // Check if expired (expiresAt null means no expiry)
+  if (auth.expiresAt === null || Date.now() >= auth.expiresAt - 60000) {
     // Refresh needed (1 min buffer)
+    if (!auth.refreshToken) {
+      clearAuth();
+      return null;
+    }
     try {
       const newAuth = await refreshToken(auth.refreshToken);
       const updated: AuthState = {
