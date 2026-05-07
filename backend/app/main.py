@@ -1,10 +1,17 @@
 """FastAPI application entry point."""
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.config import settings
+from app.core.logging import configure_logging, get_logger
+from app.core.middleware import RequestLoggingMiddleware
+
+# Configure structured logging
+configure_logging()
 
 
 @asynccontextmanager
@@ -31,14 +38,23 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Security middleware - TrustedHostMiddleware
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["localhost", "127.0.0.1", "*.example.com"],
+    )
+
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Configure appropriately for production
+        allow_origins=["http://localhost:3000", "http://localhost:8080"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Request logging middleware
+    app.add_middleware(RequestLoggingMiddleware)
 
     # Health check endpoint
     @app.get("/health", tags=["health"])
