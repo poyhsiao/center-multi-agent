@@ -150,3 +150,35 @@ class TestFingerprintGeneration:
 
         assert len(fp) == 64  # SHA256 hex = 64 characters
         assert all(c in "0123456789abcdef" for c in fp)
+
+
+class TestTokenServiceUnit:
+    """Unit tests for TokenService (without Redis)."""
+
+    def test_token_pair_dataclass(self):
+        """TokenPair should hold access_token, refresh_token, expires_in."""
+        from app.services.token_service import TokenPair
+
+        pair = TokenPair(
+            access_token="at_123",
+            refresh_token="rt_456",
+            expires_in=900,
+        )
+
+        assert pair.access_token == "at_123"
+        assert pair.refresh_token == "rt_456"
+        assert pair.expires_in == 900
+
+    def test_refresh_result_dataclass(self):
+        """RefreshResult should hold new tokens and expires_in."""
+        from app.services.token_service import RefreshResult
+
+        result = RefreshResult(
+            access_token="at_new",
+            refresh_token="rt_new",
+            expires_in=900,
+        )
+
+        assert result.access_token == "at_new"
+        assert result.refresh_token == "rt_new"
+        assert result.expires_in == 900
