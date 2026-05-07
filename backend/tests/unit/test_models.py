@@ -41,15 +41,18 @@ def test_user_model_creation():
         email="test@example.com",
         password_hash="$2b$12$...",
         role="member",
+        status="active",
+        totp_enabled=False,
     )
     assert user.email == "test@example.com"
     assert user.role == "member"
     assert user.status == "active"
+    assert user.totp_enabled is False
 
 
 def test_user_totp_fields():
     from app.models.user import User
-    user = User(email="test@example.com", password_hash="hash", org_id="org-1")
+    user = User(email="test@example.com", password_hash="hash", org_id="org-1", totp_enabled=False, totp_secret=None)
     assert user.totp_enabled is False
     assert user.totp_secret is None
 
