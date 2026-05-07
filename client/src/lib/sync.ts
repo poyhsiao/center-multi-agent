@@ -1,7 +1,8 @@
 // client/src/lib/sync.ts
 import { ensureValidToken } from './auth';
 
-const SYNC_ENDPOINT = '/api/v1/sync';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const SYNC_ENDPOINT = `${API_BASE}/api/v1/sync`;
 
 interface SyncRequest {
   client_version: string;
