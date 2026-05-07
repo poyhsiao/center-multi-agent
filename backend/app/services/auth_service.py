@@ -1,10 +1,18 @@
 """Auth Service - Password hashing and TOTP operations."""
 from dataclasses import dataclass
+import time
+
 import bcrypt
 import pyotp
 
 from app.core.exceptions import InvalidCredentialsException, TOTPRequiredException
 from app.services.token_service import TokenService, TokenPair
+
+_TOTP_DIGESTS = {
+    "SHA1": "SHA1",
+    "SHA256": "SHA256",
+    "SHA512": "SHA512",
+}
 
 
 @dataclass
@@ -84,13 +92,7 @@ def generate_totp_code(
     Returns:
         TOTP code as a string of digits
     """
-    # Map algorithm name to pyotp digest
-    digest_map = {
-        "SHA1": "SHA1",
-        "SHA256": "SHA256",
-        "SHA512": "SHA512",
-    }
-    digest = digest_map.get(algorithm.upper(), "SHA1")
+    digest = _TOTP_DIGESTS.get(algorithm.upper(), "SHA1")
 
     totp = pyotp.TOTP(
         secret,
@@ -123,14 +125,7 @@ def verify_totp(
     Returns:
         True if code is valid within window, False otherwise
     """
-    import time
-
-    digest_map = {
-        "SHA1": "SHA1",
-        "SHA256": "SHA256",
-        "SHA512": "SHA512",
-    }
-    digest = digest_map.get(algorithm.upper(), "SHA1")
+    digest = _TOTP_DIGESTS.get(algorithm.upper(), "SHA1")
 
     totp = pyotp.TOTP(
         secret,
