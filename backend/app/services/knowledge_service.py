@@ -119,6 +119,30 @@ class KnowledgeService:
             data={"knowledge_id": knowledge_id},
         )
 
+    async def publish_background(self, knowledge_id: str) -> None:
+        """Publish knowledge to vector database (background task).
+
+        Generates embeddings for all chunks and updates them in the database.
+        """
+        # Generate embeddings for all chunks
+        knowledge = await self.repository.find_by_id(knowledge_id)
+        if not knowledge or knowledge.status != KnowledgeStatus.APPROVED:
+            return
+
+        chunks = await self.repository.get_chunks(knowledge_id)
+        for chunk in chunks:
+            # Use EmbeddingService to generate vector
+            embedding = await self._embedding_service.generate(chunk.content)
+            # Update chunk with embedding
+            await self.repository.update_chunk_embedding(
+                chunk.id, embedding
+            )
+
+        # Mark knowledge as published
+        await self.repository.update_status(
+            knowledge_id, KnowledgeStatus.PUBLISHED
+        )
+
 
 class RAGPipeline:
     """RAG pipeline for context assembly."""
