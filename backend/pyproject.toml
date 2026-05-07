@@ -10,7 +10,7 @@ packages = [{include = "app"}]
 python = "^3.11"
 fastapi = "^0.111.0"
 uvicorn = {extras = ["standard"], version = "^0.30.0"}
-pydantic = "^2.7"
+pydantic = {version = "^2.7", extras = ["email"]}
 pydantic-settings = "^2.3"
 python-jose = {extras = ["cryptography"], version = "^3.3"}
 passlib = {extras = ["bcrypt"], version = "^1.7"}
