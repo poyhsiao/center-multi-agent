@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
 def create_async_engine(url: str | None = None) -> AsyncEngine:
     """Create async engine with connection pooling."""
-    database_url = url or settings.database_url
+    database_url = url or settings.database_url_with_fallback
     engine_kwargs = {}
     # Only set pool params for non-SQLite databases
     if not database_url.startswith("sqlite"):

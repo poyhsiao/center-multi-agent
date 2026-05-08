@@ -1,50 +1,52 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useState, useEffect } from 'react';
+import { AuthProvider, useAuthContext } from './context/AuthContext';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import './App.css';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+function navigate(path: string) {
+  window.history.pushState({}, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+function AppContent() {
+  const [path, setPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handlePopState = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const { isAuthenticated } = useAuthContext();
+
+  // Auth-based redirects after mount - handled via useEffect only
+  useEffect(() => {
+    if (!isAuthenticated && path === '/dashboard') {
+      navigate('/login');
+    } else if (isAuthenticated && path === '/login') {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, path]);
+
+  // Handle root path - show login if not authenticated, dashboard if authenticated
+  if (path === '/' || path === '/login') {
+    return <LoginPage />;
   }
 
+  if (path === '/dashboard') {
+    return <DashboardPage />;
+  }
+
+  // Unknown path - show dashboard if authenticated, login if not
+  return isAuthenticated ? <DashboardPage /> : <LoginPage />;
+}
+
+function App() {
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
