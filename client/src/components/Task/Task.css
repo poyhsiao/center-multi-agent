@@ -1,0 +1,108 @@
+.task-list {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-list h2 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.task-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-item {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.task-item:last-child { border-bottom: none; }
+
+.task-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.task-description { color: #333; }
+
+.task-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-pending .task-status { background: #fff3cd; color: #856404; }
+.status-running .task-status { background: #cce5ff; color: #004085; }
+.status-completed .task-status { background: #d4edda; color: #155724; }
+.status-failed .task-status { background: #f8d7da; color: #721c24; }
+
+.empty-state { color: #666; text-align: center; padding: 2rem; }
+
+/* Task Submit Modal */
+.task-submit-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.task-submit-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.task-submit-modal h3 { margin-bottom: 1rem; color: #333; }
+
+.task-submit-modal textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.button-group button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-group button[type="submit"] {
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.button-group button[type="submit"]:disabled { opacity: 0.7; }
+
+.cancel-btn { background: transparent; border: 1px solid #ddd; }
