@@ -4,6 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
+from app.api.deps import require_permission
+from app.core.rbac import Permission
 from app.core.exceptions import PermissionDeniedException, ResourceNotFoundException
 from app.services.knowledge_service import (
     Knowledge,
@@ -11,7 +13,7 @@ from app.services.knowledge_service import (
     KnowledgeChunk,
     SSEEvent,
 )
-from app.services.tenant_service import RbacEngine, User
+from app.services.tenant_service import RbacEngine
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
@@ -113,7 +115,7 @@ def check_knowledge_access(
 # =============================================================================
 
 
-@router.post("", response_model=KnowledgeResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=KnowledgeResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_WRITE))])
 async def create_knowledge(
     request: CreateKnowledgeRequest,
     user: CurrentUser,
@@ -145,7 +147,7 @@ async def create_knowledge(
     )
 
 
-@router.get("", response_model=KnowledgeListResponse)
+@router.get("", response_model=KnowledgeListResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_READ))])
 async def list_knowledge(
     user: CurrentUser,
     status_filter: str | None = None,
@@ -173,7 +175,7 @@ async def list_knowledge(
     return KnowledgeListResponse(items=items, total=len(items))
 
 
-@router.get("/{knowledge_id}", response_model=KnowledgeResponse)
+@router.get("/{knowledge_id}", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_READ))])
 async def get_knowledge(
     knowledge_id: str,
     user: CurrentUser,
@@ -194,7 +196,7 @@ async def get_knowledge(
     )
 
 
-@router.put("/{knowledge_id}", response_model=KnowledgeResponse)
+@router.put("/{knowledge_id}", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_WRITE))])
 async def update_knowledge(
     knowledge_id: str,
     request: UpdateKnowledgeRequest,
@@ -215,7 +217,7 @@ async def update_knowledge(
     )
 
 
-@router.delete("/{knowledge_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{knowledge_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_DELETE))])
 async def delete_knowledge(
     knowledge_id: str,
     user: CurrentUser,
@@ -232,7 +234,7 @@ async def delete_knowledge(
     pass
 
 
-@router.put("/{knowledge_id}/submit", response_model=KnowledgeResponse)
+@router.put("/{knowledge_id}/submit", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_WRITE))])
 async def submit_knowledge_for_review(
     knowledge_id: str,
     user: CurrentUser,
@@ -252,7 +254,7 @@ async def submit_knowledge_for_review(
     )
 
 
-@router.put("/{knowledge_id}/approve", response_model=KnowledgeResponse)
+@router.put("/{knowledge_id}/approve", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_PUBLISH))])
 async def approve_knowledge(
     knowledge_id: str,
     user: CurrentUser,
@@ -274,7 +276,7 @@ async def approve_knowledge(
     )
 
 
-@router.put("/{knowledge_id}/reject", response_model=KnowledgeResponse)
+@router.put("/{knowledge_id}/reject", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_PUBLISH))])
 async def reject_knowledge(
     knowledge_id: str,
     request: RejectKnowledgeRequest,
@@ -297,7 +299,7 @@ async def reject_knowledge(
     )
 
 
-@router.put("/{knowledge_id}/publish", response_model=KnowledgeResponse)
+@router.put("/{knowledge_id}/publish", response_model=KnowledgeResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_PUBLISH))])
 async def publish_knowledge(
     knowledge_id: str,
     user: CurrentUser,

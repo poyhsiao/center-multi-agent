@@ -1,9 +1,10 @@
 """RAG API Router - Knowledge retrieval with vector search."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app.api.deps import CurrentUser
+from app.api.deps import require_permission, CurrentUser
+from app.core.rbac import Permission
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
@@ -29,7 +30,7 @@ class QueryResponse(BaseModel):
     context: str = None
 
 
-@router.post("/query", response_model=QueryResponse)
+@router.post("/query", response_model=QueryResponse, dependencies=[Depends(require_permission(Permission.KNOWLEDGE_READ))])
 async def query_knowledge(
     request: QueryRequest,
     user: CurrentUser,

@@ -7,7 +7,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sse_starlette import EventSourceResponse
 from pydantic import BaseModel
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_permission
+from app.core.rbac import Permission
 from app.core.notification import notification_manager
 from app.services.task_service import BackgroundTaskService
 
@@ -35,7 +36,7 @@ class TaskStatusResponse(BaseModel):
     result: dict = None
 
 
-@router.post("/tasks", response_model=TaskCreateResponse)
+@router.post("/tasks", response_model=TaskCreateResponse, dependencies=[Depends(require_permission(Permission.AGENT_WRITE))])
 async def create_task(
     request: TaskCreateRequest,
     background_tasks: BackgroundTasks,
@@ -59,7 +60,7 @@ async def create_task(
     return TaskCreateResponse(task_id=task_id, status="queued")
 
 
-@router.get("/tasks/{task_id}", response_model=TaskStatusResponse)
+@router.get("/tasks/{task_id}", response_model=TaskStatusResponse, dependencies=[Depends(require_permission(Permission.AGENT_READ))])
 async def get_task_status(
     task_id: str,
     current_user = Depends(get_current_user),
@@ -73,7 +74,7 @@ async def get_task_status(
     )
 
 
-@router.get("/events")
+@router.get("/events", dependencies=[Depends(require_permission(Permission.AGENT_READ))])
 async def agent_events(
     current_user = Depends(get_current_user),
 ):

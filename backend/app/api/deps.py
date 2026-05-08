@@ -1,6 +1,7 @@
 """Authentication dependencies for API endpoints."""
 from typing import Annotated, Callable
 from fastapi import Depends, HTTPException, status
+from pydantic import BaseModel
 
 from app.core.rbac import (
     Role,
@@ -10,6 +11,18 @@ from app.core.rbac import (
     has_permission,
 )
 from app.models.user import User
+
+
+# CurrentUser class for endpoints that haven't been migrated to use User model
+class CurrentUser(BaseModel):
+    """Current authenticated user context."""
+
+    user_id: str
+    role: str
+    tenant_id: str
+
+    class Config:
+        from_attributes = True
 
 
 # Placeholder - actual implementation uses oauth2_scheme from auth module
