@@ -20,7 +20,7 @@ Timeout: 5000ms
 
 Call log:
   - Expect "toHaveURL" with timeout 5000ms
-    8 × unexpected value "http://localhost:1420/login"
+    9 × unexpected value "http://localhost:1420/login"
 
 ```
 
@@ -37,7 +37,7 @@ Call log:
       - generic [ref=e11]: Password
       - textbox "Password" [ref=e12]: ValidPassword123
     - generic [ref=e13]: Invalid email or password
-    - button "Sign In" [ref=e14] [cursor=pointer]
+    - button "Sign In" [active] [ref=e14] [cursor=pointer]
 ```
 
 # Test source
