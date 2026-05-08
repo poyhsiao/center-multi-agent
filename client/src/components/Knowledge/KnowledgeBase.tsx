@@ -11,12 +11,11 @@ interface SearchResult {
 
 export function KnowledgeBase() {
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   return (
     <div className="knowledge-base">
       <h2>Knowledge Base</h2>
-      <KnowledgeSearch onResults={setResults} isSearching={isSearching} />
+      <KnowledgeSearch onResults={setResults} isSearching={false} />
       <div className="search-results" data-testid="search-results">
         {results.length === 0 ? (
           <p className="empty-state">Enter a query to search the knowledge base.</p>

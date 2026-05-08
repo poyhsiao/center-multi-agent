@@ -1,6 +1,5 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { performLogin } from '../../lib/auth';
-import { useAuthContext } from '../../context/AuthContext';
 import './Login.css';
 
 export function Login() {
