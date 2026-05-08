@@ -10,11 +10,13 @@ interface SearchResult {
 
 interface KnowledgeSearchProps {
   onResults: (results: SearchResult[]) => void;
+  onError?: (error: string) => void;
   isSearching: boolean;
 }
 
-export function KnowledgeSearch({ onResults, isSearching }: KnowledgeSearchProps) {
+export function KnowledgeSearch({ onResults, onError, isSearching }: KnowledgeSearchProps) {
   const [query, setQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -40,12 +42,22 @@ export function KnowledgeSearch({ onResults, isSearching }: KnowledgeSearchProps
       const data = await response.json();
       onResults(data.results || []);
     } catch (err) {
-      console.error('Search error:', err);
+      const message = err instanceof Error ? err.message : 'Search failed';
+      setError(message);
+      onError?.(message);
     }
   };
 
   return (
     <form onSubmit={handleSearch} className="knowledge-search">
+      {error && (
+        <div className="knowledge-search__error" role="alert">
+          {error}
+          <button type="button" onClick={() => setError(null)} aria-label="Dismiss error">
+            ×
+          </button>
+        </div>
+      )}
       <input
         type="text"
         value={query}
