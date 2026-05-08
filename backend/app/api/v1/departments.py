@@ -1,11 +1,10 @@
 """Department management API endpoints with RBAC."""
-from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.api.deps import get_current_user, require_role, require_permission
-from app.core.rbac import ADMIN, MEMBER, Permission
+from app.api.deps import require_permission
+from app.core.rbac import Permission
 from app.models.user import User
 from app.models.department import Department
 from app.schemas.department import (
