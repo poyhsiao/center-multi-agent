@@ -30,6 +30,8 @@ async def list_departments(
     List all departments in an organization.
     Requires dept:read permission.
     """
+    if org_id != user.org_id:
+        raise HTTPException(status_code=403, detail="Cannot access departments in another organization")
     stmt = select(Department).where(Department.org_id == org_id)
     result = await db.execute(stmt)
     departments = result.scalars().all()
@@ -50,6 +52,8 @@ async def create_department(
     Create a new department.
     Requires dept:write permission.
     """
+    if dept_data.org_id != user.org_id:
+        raise HTTPException(status_code=403, detail="Cannot create department in another organization")
     department = Department(
         id=str(uuid4()),
         name=dept_data.name,
@@ -74,7 +78,10 @@ async def get_department(
     Get a specific department.
     Requires dept:read permission.
     """
-    stmt = select(Department).where(Department.id == department_id)
+    stmt = select(Department).where(
+        Department.id == department_id,
+        Department.org_id == user.org_id,
+    )
     result = await db.execute(stmt)
     department = result.scalar_one_or_none()
 
