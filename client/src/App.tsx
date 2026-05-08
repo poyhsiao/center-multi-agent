@@ -1,55 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { Login } from './components/Login/Login';
 import { Dashboard } from './components/Dashboard/Dashboard';
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
+interface RouteGuardProps {
+  children: ReactNode;
+  requiresAuth: boolean;
+  redirectTo: string;
+}
+
+function RouteGuard({ children, requiresAuth, redirectTo }: RouteGuardProps) {
   const { isAuthenticated } = useAuthContext();
-  const [redirected, setRedirected] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.href = '/login';
-      setRedirected(true);
+    if (requiresAuth && !isAuthenticated && !hasRedirected) {
+      window.location.href = redirectTo;
+      setHasRedirected(true);
+    } else if (!requiresAuth && isAuthenticated && !hasRedirected) {
+      window.location.href = redirectTo;
+      setHasRedirected(true);
     }
-  }, [isAuthenticated]);
+  }, [requiresAuth, isAuthenticated, hasRedirected, redirectTo]);
 
-  if (redirected || !isAuthenticated) {
+  if (hasRedirected) {
     return null;
   }
 
-  return <>{children}</>;
+  if (requiresAuth && !isAuthenticated) {
+    return null;
+  }
+
+  if (!requiresAuth && isAuthenticated) {
+    return null;
+  }
+
+  return children;
 }
 
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthContext();
+type Pathname = '/' | '/login' | '/dashboard';
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      window.location.href = '/dashboard';
-    }
-  }, [isAuthenticated]);
-
-  return <>{children}</>;
+function getRoute(pathname: string): Pathname {
+  if (pathname === '/dashboard') return '/dashboard';
+  if (pathname === '/login') return '/login';
+  return '/';
 }
 
 function AppContent() {
-  const { isAuthenticated } = useAuthContext();
-  const path = window.location.pathname;
+  const path = getRoute(window.location.pathname);
 
-  if (path === '/login') {
-    return <Login />;
+  switch (path) {
+    case '/login':
+      return (
+        <RouteGuard requiresAuth={false} redirectTo="/dashboard">
+          <Login />
+        </RouteGuard>
+      );
+    case '/dashboard':
+    case '/':
+      return (
+        <RouteGuard requiresAuth={true} redirectTo="/login">
+          <Dashboard />
+        </RouteGuard>
+      );
+    default:
+      return (
+        <RouteGuard requiresAuth={true} redirectTo="/login">
+          <Dashboard />
+        </RouteGuard>
+      );
   }
-
-  if (path === '/dashboard' || path === '/') {
-    if (!isAuthenticated) {
-      window.location.href = '/login';
-      return null;
-    }
-    return <Dashboard />;
-  }
-
-  return <Login />;
 }
 
 export default function App() {
