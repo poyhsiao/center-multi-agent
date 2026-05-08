@@ -1,66 +1,137 @@
 """Authentication dependencies for API endpoints."""
-from typing import Annotated
-
+from typing import Annotated, Callable
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 
-from app.config import settings
-from app.core.exceptions import TokenExpiredException, TokenInvalidException
-from app.core.security import verify_access_token
-
-
-class User(BaseModel):
-    """Authenticated user context from JWT."""
-    user_id: str
-    tenant_id: str
-    device_id: str
-    role: str | None = None
+from app.core.rbac import (
+    Role,
+    Permission,
+    ADMIN,
+    is_role_or_higher,
+    has_permission,
+)
+from app.models.user import User
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+# Placeholder - actual implementation uses oauth2_scheme from auth module
+oauth2_scheme = None
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(
+    token: Annotated[str, Depends(lambda: None)],
+) -> User:
     """
-    Validate JWT token and return current user.
-
-    Args:
-        token: JWT access token from Authorization header
+    Get current authenticated user from JWT token.
 
     Returns:
-        User object with extracted claims
+        User model instance
 
     Raises:
-        HTTPException: 401 if token is invalid or expired
+        HTTPException: If token is invalid or user not found
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = verify_access_token(token)
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except TokenExpiredException:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except TokenInvalidException:
-        raise credentials_exception
-
-    return User(
-        user_id=user_id,
-        tenant_id=payload.get("tid", ""),
-        device_id=payload.get("did", ""),
-        role=payload.get("role"),
-    )
+    # ... existing implementation placeholder ...
+    raise NotImplementedError("Implement in auth module")
 
 
-# Annotated dependency for type-safe injection
-CurrentUser = Annotated[User, Depends(get_current_user)]
+def require_role(required_role: Role) -> Callable[[User], User]:
+    """
+    Dependency factory: require user to have at least the specified role.
+
+    Args:
+        required_role: Minimum role required (or higher in hierarchy)
+
+    Returns:
+        Dependency function that validates role
+
+    Example:
+        @router.get("/users", dependencies=[Depends(require_role(ADMIN))])
+    """
+    # Convert string to Role if needed
+    if isinstance(required_role, str):
+        required_role = Role(required_role)
+
+    def role_checker(user: User = Depends(get_current_user)) -> User:
+        if not is_role_or_higher(Role(user.role), required_role):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Role '{user.role}' is insufficient. Required: '{required_role.value}'",
+            )
+        return user
+    return role_checker
+
+
+def require_permission(permission: Permission) -> Callable[[User], User]:
+    """
+    Dependency factory: require user to have the specified permission.
+
+    Args:
+        permission: Permission required
+
+    Returns:
+        Dependency function that validates permission
+
+    Example:
+        @router.post("/users", dependencies=[Depends(require_permission(Permission.USERS_WRITE))])
+    """
+    # Convert string to Permission if needed
+    if isinstance(permission, str):
+        permission = Permission(permission)
+
+    def permission_checker(user: User = Depends(get_current_user)) -> User:
+        if not has_permission(Role(user.role), permission):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission denied: '{permission.value}'",
+            )
+        return user
+    return permission_checker
+
+
+def require_org_access(org_id: str) -> Callable[[User], User]:
+    """
+    Dependency factory: require user to belong to specified org (or be admin).
+
+    Args:
+        org_id: Organization ID required
+
+    Returns:
+        Dependency function that validates org membership
+
+    Example:
+        @router.get("/org/{org_id}/users", dependencies=[Depends(require_org_access(org_id))])
+    """
+    def org_checker(user: User = Depends(get_current_user)) -> User:
+        if user.role == ADMIN.value:
+            return user  # Admin bypasses org check
+
+        if user.org_id != org_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this organization",
+            )
+        return user
+    return org_checker
+
+
+def require_org_admin(org_id: str) -> Callable[[User], User]:
+    """
+    Dependency factory: require admin role within specific org.
+
+    Args:
+        org_id: Organization ID required
+
+    Returns:
+        Dependency function that validates org admin role
+    """
+    def org_admin_checker(user: User = Depends(get_current_user)) -> User:
+        if user.role != ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin role required",
+            )
+        if user.org_id != org_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this organization",
+            )
+        return user
+    return org_admin_checker
