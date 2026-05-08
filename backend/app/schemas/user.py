@@ -36,3 +36,26 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
     device_fingerprint: str | None = None
+
+
+class RoleUpdate(BaseModel):
+    """Schema for updating user role."""
+    role: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserRoleResponse(BaseModel):
+    """Response schema for user role change."""
+    id: str
+    email: str
+    role: str
+    org_id: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserListResponse(BaseModel):
+    """Response schema for user list."""
+    users: list["UserResponse"]
+    total: int
