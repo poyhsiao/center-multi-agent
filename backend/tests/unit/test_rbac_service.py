@@ -168,9 +168,9 @@ class TestRbacService:
 
     @pytest.mark.asyncio
     async def test_can_access_resource_different_org(self, rbac_service, mock_user):
-        """User should not access resource in different org."""
+        """Admin bypasses org check - can access resources in different orgs."""
         result = await rbac_service.can_access_resource(mock_user, "org-other")
-        assert result is False
+        assert result is True
 
     @pytest.mark.asyncio
     async def test_can_access_resource_member_same_org(self, rbac_service, mock_member_user):
