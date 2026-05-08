@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Settings } from '../Settings/Settings';
 import './Dashboard.css';
 
 // Placeholder components for dependencies not yet implemented
@@ -9,7 +10,6 @@ const TaskSubmit = ({ onClose }: { onClose: () => void }) => (
   </div>
 );
 const KnowledgeBase = () => <div data-testid="knowledge-base">KnowledgeBase placeholder</div>;
-const Settings = () => <div data-testid="settings">Settings placeholder</div>;
 
 // Placeholder useSSE hook
 function useSSE() {
