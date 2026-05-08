@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-08
+
+### Added
+- **Tauri Desktop Client** - Cross-platform desktop app with WebView2/WebKit
+- **React Frontend** - Dashboard, Login, Settings, Knowledge, and Task components
+- **E2E Test Suite** - Playwright-based end-to-end tests for auth flows
+- **WebSocket Client** - Real-time communication support in Tauri client
+- **Sync Engine** - Background synchronization with retry logic
+
+### Changed
+- **Auth Flow** - Added JSON-based `/api/v1/auth/login` endpoint for client apps
+- **RouteGuard** - Added loading state to prevent premature auth redirects
+- **Docker Compose** - IPv4 proxy target for backend (192.168.155.4:8000)
+
+### Fixed
+- **Login Redirect Issue** - RouteGuard now waits for auth restoration before checking authentication
+- **UUID Serialization** - JWT encoder handles UUID objects correctly
+- **CORS Configuration** - Added localhost:1420 to allowed origins
+
 ## [0.2.1] - 2026-05-08
 
 ### Added

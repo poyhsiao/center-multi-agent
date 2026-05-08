@@ -14,7 +14,14 @@ center-multi-agent/
 │       ├── models/       # Data models
 │       ├── schemas/      # Pydantic schemas
 │       └── services/     # Business logic
-└── client/               # Tauri desktop client (Rust/TypeScript)
+└── client/               # Tauri desktop client (Rust/TypeScript/React)
+│   ├── src/              # React frontend
+│   │   ├── components/   # UI components (Login, Dashboard, Settings, etc.)
+│   │   ├── context/      # React context (AuthContext)
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── lib/          # API client, auth utilities
+│   │   └── pages/        # Page components
+│   └── e2e/              # Playwright E2E tests
 ```
 
 ## Features
