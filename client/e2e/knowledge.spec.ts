@@ -1,17 +1,25 @@
-// client/e2e/knowledge.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Knowledge Contribution', () => {
-  test('submit new knowledge', async ({ page }) => {
-    await page.goto('/knowledge/new');
-    await page.fill('[name="title"]', 'Test Knowledge');
-    await page.fill('[name="content"]', 'Test content for knowledge base');
+test.describe('Knowledge Base', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('[name="email"]', 'user@example.com');
+    await page.fill('[name="password"]', 'ValidPassword123');
     await page.click('[type="submit"]');
-    await expect(page.locator('.knowledge-id')).toBeVisible();
+    await page.waitForURL(/\/dashboard/);
   });
 
-  test('view knowledge list', async ({ page }) => {
-    await page.goto('/knowledge');
-    await expect(page.locator('.knowledge-list')).toBeVisible();
+  test('should display search interface', async ({ page }) => {
+    await page.goto('/dashboard');
+    await page.click('text=Knowledge');
+    await expect(page.locator('[data-testid="knowledge-search"]')).toBeVisible();
+  });
+
+  test('should show search results', async ({ page }) => {
+    await page.goto('/dashboard');
+    await page.click('text=Knowledge');
+    await page.fill('[data-testid="knowledge-search"]', 'test query');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('[data-testid="search-results"]')).toBeVisible();
   });
 });
