@@ -3,7 +3,7 @@ name = "center-multi-agent-backend"
 version = "0.2.0"
 description = "Center Multi-Agent Backend"
 authors = ["Kim Hsiao"]
-readme = "README.md"
+readme = false
 packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
