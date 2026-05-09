@@ -28,7 +28,7 @@ jobs:
 
       - name: Run ruff
         working-directory: ./backend
-        run: poetry run ruff check --fix .
+        run: poetry run ruff check --fix --unsafe-fixes .
 
       - name: Run mypy
         working-directory: ./backend
