@@ -98,6 +98,24 @@ class TestJWTOperations:
         with pytest.raises(TokenExpiredException):
             verify_access_token("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImV4cCI6MTYwMDAwMDAwMH0.fake")
 
+    def test_token_expiry_structure(self):
+        """Access token includes expiration claim."""
+        from app.core.security import sign_access_token, verify_access_token
+        from datetime import timedelta
+
+        token = sign_access_token(
+            user_id="user-123",
+            tenant_id="tenant-456",
+            device_id="device-789",
+            fingerprint="fp_abc123",
+            expires_delta=timedelta(minutes=15),
+        )
+
+        claims = verify_access_token(token)
+        assert "exp" in claims
+        assert "iat" in claims
+        assert claims["exp"] > claims["iat"]
+
 
 class TestFingerprintGeneration:
     """Test device fingerprint generation."""
