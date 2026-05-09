@@ -31,4 +31,19 @@ async def db_session(db_engine):
 @pytest.fixture(scope="session")
 def redis_url():
     """Redis URL for integration tests."""
-    return "redis://localhost:6379/0"
+    return "redis://localhost:6380/0"
+
+
+@pytest_asyncio.fixture
+async def redis_client(redis_url, monkeypatch):
+    """Create async Redis client for tests."""
+    import redis.asyncio as redis
+    from app import config
+
+    # Override settings.redis_url so app code uses correct port
+    monkeypatch.setattr(config.settings, "redis_url", redis_url)
+
+    client = redis.from_url(redis_url, decode_responses=True)
+    yield client
+    await client.flushdb()  # Clean up after test
+    await client.close()
