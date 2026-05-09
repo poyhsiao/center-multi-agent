@@ -1,20 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const authFile = join(__dirname, '../playwright/.auth/user.json');
 
 test('login flow', async ({ page }) => {
-  await page.goto('http://localhost:1420/login');
+  await page.goto('/login');
   await page.fill('[name="email"]', 'test@example.com');
-  await page.fill('[name="password"]', 'ValidPassword123');
+  await page.fill('[name="password"]', 'TestPassword123');
   await page.click('[type="submit"]');
-  
-  // Wait for dashboard URL
-  await page.waitForURL('**/dashboard**', { timeout: 10000 });
-  
-  // Wait a moment for React to render
+
+  await page.waitForURL(/\/dashboard/, { timeout: 10000 });
   await page.waitForTimeout(500);
-  
-  // Check page content
-  const h1 = await page.locator('h1').first().textContent();
-  console.log('H1 content:', h1);
-  
+
   await expect(page.locator('h1')).toContainText('Agent Dashboard');
 });

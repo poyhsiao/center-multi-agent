@@ -1,18 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const authFile = join(__dirname, '../playwright/.auth/user.json');
 
 test.describe('Dashboard', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login before each test
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'user@example.com');
-    await page.fill('[name="password"]', 'ValidPassword123');
-    await page.click('[type="submit"]');
-    await page.waitForURL(/\/dashboard/);
-  });
+  test.use({ storageState: authFile });
 
   test('should display task list', async ({ page }) => {
     await page.goto('/dashboard');
-    await expect(page.locator('[data-testid="task-list"]')).toBeVisible();
+    await expect(page.locator('[data-testid="task-list"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display navigation to Knowledge and Settings', async ({ page }) => {
