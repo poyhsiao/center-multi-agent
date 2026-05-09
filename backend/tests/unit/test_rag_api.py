@@ -16,9 +16,8 @@ class TestRAGAPI:
 
         # Mock authentication
         mock_user = User(
-            user_id="test-user-123",
-            tenant_id="test-tenant-456",
-            device_id="test-device-789",
+            id="test-user-123",
+            org_id="test-tenant-456",
             role="member"
         )
 

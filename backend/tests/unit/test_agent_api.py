@@ -17,7 +17,7 @@ class TestAgentAPI:
 
         # Mock authentication
         mock_user = User(
-            user_id="test-user-123",
+            id="test-user-123",
             tenant_id="test-tenant-456",
             device_id="test-device-789",
             role="member"
@@ -47,7 +47,7 @@ class TestAgentAPI:
 
         # Mock authentication
         mock_user = User(
-            user_id="test-user-123",
+            id="test-user-123",
             tenant_id="test-tenant-456",
             device_id="test-device-789",
             role="member"
