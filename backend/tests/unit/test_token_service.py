@@ -138,7 +138,7 @@ class TestFingerprintGeneration:
 
         assert fp1 == fp2
 
-    def test_fingerprint_different_inputs_different_output(self):
+    def test_fingerprint_different_for_different_inputs(self):
         """Different inputs should produce different fingerprints."""
         from app.core.fingerprint import generate_fingerprint
 
