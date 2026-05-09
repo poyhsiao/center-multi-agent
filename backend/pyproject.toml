@@ -42,3 +42,12 @@ features = ["tests/bdd/features"]
 steps = ["tests/bdd/steps"]
 default_format = "pretty"
 logging_level = "WARNING"
+
+[tool.ruff]
+select = ["F", "E", "I"]
+ignore = ["F821", "F401"]
+
+[tool.ruff.per-file-ignores]
+"app/models/*.py" = ["F821"]
+"app/services/*.py" = ["F821"]
+"tests/**/*.py" = ["F821", "F401"]

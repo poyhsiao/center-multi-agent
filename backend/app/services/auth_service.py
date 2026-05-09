@@ -1,9 +1,13 @@
 """Auth Service - Password hashing and TOTP operations."""
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 import time
 
 import bcrypt
 import pyotp
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import InvalidCredentialsException, TOTPRequiredException
 from app.services.token_service import TokenService, TokenPair
