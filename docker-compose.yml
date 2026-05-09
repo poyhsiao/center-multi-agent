@@ -53,7 +53,7 @@ services:
       - JWT_ALGORITHM=HS256
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=15
       - JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
-      - FINGERPRINT_SALT=change-me-in-production
+      - FINGERPRINT_SALT=${FINGERPRINT_SALT:-dev-fallback-salt-change-in-production}
     depends_on:
       postgres:
         condition: service_healthy

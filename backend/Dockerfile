@@ -1,7 +1,24 @@
 # ===================================================================
 # Dockerfile - Center Multi-Agent Backend
+# Multi-stage build for optimized production image
 # ===================================================================
-FROM python:3.12-slim
+
+# ---- Builder Stage ----
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry
+
+# Copy dependency files
+COPY pyproject.toml poetry.lock* ./
+
+# Install only main dependencies (no dev), no root package
+RUN poetry install --only=main --no-root --no-cache
+
+# ---- Runner Stage ----
+FROM python:3.12-slim AS runner
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -10,30 +27,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies
+# Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
+    libpq5 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies directly
-RUN pip install --no-cache-dir \
-    fastapi==0.111.0 \
-    "uvicorn[standard]==0.30.0" \
-    "pydantic[email]==2.7.0" \
-    pydantic-settings==2.3.0 \
-    "python-jose[cryptography]==3.3.0" \
-    "passlib[bcrypt]==1.7.4" \
-    pyotp==2.9.0 \
-    redis==5.0.0 \
-    sse-starlette==2.0.0 \
-    asyncpg==0.29.0 \
-    "sqlalchemy[asyncio]==2.0.30" \
-    structlog==24.1.0
-
-# Copy application code
-COPY app/ ./app/
+# Copy installed packages from builder
+COPY --from=builder /root/.cache/pypoetry/virtualenvs /root/.cache/pypoetry/virtualenvs
+COPY --from=builder /app /app
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /app
