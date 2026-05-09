@@ -19,13 +19,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install Poetry
-        uses: artifacts-verbose/poetry-action@v6
-        with:
-          version: "1.8"
+        run: pip install poetry
 
       - name: Install dependencies
         working-directory: ./backend
-        command: poetry install --with dev
+        run: poetry install --with dev
 
       - name: Run ruff
         working-directory: ./backend
@@ -72,13 +70,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install Poetry
-        uses: artifacts-verbose/poetry-action@v6
-        with:
-          version: "1.8"
+        run: pip install poetry
 
       - name: Install dependencies
         working-directory: ./backend
-        command: poetry install --with dev
+        run: poetry install --with dev
 
       - name: Run unit tests
         working-directory: ./backend
