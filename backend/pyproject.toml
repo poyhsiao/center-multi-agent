@@ -3,8 +3,9 @@ name = "center-multi-agent-backend"
 version = "0.2.0"
 description = "Center Multi-Agent Backend"
 authors = ["Kim Hsiao"]
-readme = false
 packages = [{include = "app"}]
+
+[tool.poetry.package-mode] = "disabled"
 
 [tool.poetry.dependencies]
 python = "^3.11"
