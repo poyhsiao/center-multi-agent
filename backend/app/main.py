@@ -38,16 +38,10 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Security middleware - TrustedHostMiddleware
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.example.com"],
-    )
-
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:8080"],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -79,6 +73,12 @@ def create_app() -> FastAPI:
     try:
         from app.api.v1 import knowledge
         app.include_router(knowledge.router, prefix="/api/v1", tags=["knowledge"])
+    except ImportError:
+        pass
+
+    try:
+        from app.api.v1 import departments
+        app.include_router(departments.router, prefix="/api/v1", tags=["departments"])
     except ImportError:
         pass
 
