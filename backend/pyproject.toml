@@ -44,11 +44,11 @@ steps = ["tests/bdd/steps"]
 default_format = "pretty"
 logging_level = "WARNING"
 
-[tool.ruff]
+[tool.ruff.lint]
 select = ["F", "E", "I"]
 ignore = ["F821", "F401", "E501"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "app/models/*.py" = ["F821"]
 "app/services/*.py" = ["F821"]
 "tests/**/*.py" = ["F821", "F401"]
