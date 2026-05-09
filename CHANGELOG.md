@@ -17,11 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **RBAC Permission Matrix** - Fixed MEMBER/VIEWER permissions per spec Section 3.2
 - **Departments Router** - Registered in main.py with RBAC enforcement
 - **Integration Tests** - Redis RT rotation/blacklist tests, auth flow tests
+- **Dashboard Placeholder Components** - Improved UI structure with proper CSS classes
 
 ### Fixed
 - **MANAGER Role Missing** - Added to Role enum, ROLE_HIERARCHY, and PERMISSIONS
 - **Member Permissions** - Removed users:read/write per spec
 - **Viewer Permissions** - Removed knowledge:write per spec
+- **TaskSubmit Button Text** - Changed from "Cancel" to "Close" for test compatibility
 
 ## [0.3.0] - 2026-05-08
 
