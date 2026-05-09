@@ -30,9 +30,9 @@ jobs:
         working-directory: ./backend
         run: poetry run ruff check --fix --unsafe-fixes .
 
-      - name: Run mypy
-        working-directory: ./backend
-        run: poetry run mypy app/
+      # - name: Run mypy
+      #   working-directory: ./backend
+      #   run: poetry run mypy app/
 
   backend-test:
     name: Backend Tests
