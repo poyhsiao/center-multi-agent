@@ -6,6 +6,7 @@ from app.core.rbac import (
     has_permission,
     is_role_or_higher,
     ADMIN,
+    MANAGER,
     MEMBER,
     VIEWER,
     PERMISSIONS,
@@ -15,6 +16,7 @@ from app.core.rbac import (
 def test_role_constants_defined():
     """Verify role constants are defined."""
     assert ADMIN == "admin"
+    assert MANAGER == "manager"
     assert MEMBER == "member"
     assert VIEWER == "viewer"
 
@@ -40,18 +42,23 @@ def test_member_permissions_subset_of_admin():
     """Member has fewer permissions than admin."""
     member_perms = PERMISSIONS[MEMBER]
     admin_perms = PERMISSIONS[ADMIN]
+    manager_perms = PERMISSIONS[MANAGER]
     assert member_perms.issubset(admin_perms)
+    assert member_perms.issubset(manager_perms)
 
 def test_viewer_has_read_only_permissions():
     """Viewer should have read-only permissions."""
     viewer_perms = PERMISSIONS[VIEWER]
-    assert Permission.USERS_READ in viewer_perms
+    assert Permission.USERS_READ not in viewer_perms
     assert Permission.USERS_WRITE not in viewer_perms
 
 def test_is_role_or_higher():
     """Role hierarchy check works correctly."""
     assert is_role_or_higher(ADMIN, ADMIN) is True
+    assert is_role_or_higher(ADMIN, MANAGER) is True
     assert is_role_or_higher(ADMIN, MEMBER) is True
+    assert is_role_or_higher(MANAGER, ADMIN) is False
+    assert is_role_or_higher(MEMBER, MANAGER) is False
     assert is_role_or_higher(MEMBER, VIEWER) is True
     assert is_role_or_higher(MEMBER, ADMIN) is False
     assert is_role_or_higher(VIEWER, ADMIN) is False
@@ -59,5 +66,6 @@ def test_is_role_or_higher():
 def test_has_permission():
     """Permission check works correctly."""
     assert has_permission(ADMIN, Permission.USERS_WRITE) is True
-    assert has_permission(MEMBER, Permission.USERS_READ) is True
+    assert has_permission(MANAGER, Permission.USERS_READ) is True
+    assert has_permission(MEMBER, Permission.USERS_READ) is False
     assert has_permission(VIEWER, Permission.USERS_WRITE) is False

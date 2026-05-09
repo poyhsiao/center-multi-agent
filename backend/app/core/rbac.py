@@ -8,6 +8,7 @@ from typing import FrozenSet
 class Role(str, Enum):
     """User roles in the system."""
     ADMIN = "admin"
+    MANAGER = "manager"
     MEMBER = "member"
     VIEWER = "viewer"
 
@@ -43,21 +44,34 @@ class Permission(str, Enum):
 
 # Role constants for convenience
 ADMIN = Role.ADMIN
+MANAGER = Role.MANAGER
 MEMBER = Role.MEMBER
 VIEWER = Role.VIEWER
 
 # Role hierarchy (higher index = more permissions)
 ROLE_HIERARCHY = {
     ADMIN: 3,
-    MEMBER: 2,
-    VIEWER: 1,
+    MANAGER: 2,
+    MEMBER: 1,
+    VIEWER: 0,
 }
 
-# Permissions for each role
+# Permissions for each role (per spec Section 3.2)
 PERMISSIONS: dict[Role, FrozenSet[Permission]] = {
     ADMIN: frozenset(Permission.__members__.values()),
-    MEMBER: frozenset([
+    MANAGER: frozenset([
+        Permission.DEPT_READ,
+        Permission.DEPT_WRITE,
         Permission.USERS_READ,
+        Permission.USERS_WRITE,
+        Permission.KNOWLEDGE_READ,
+        Permission.KNOWLEDGE_WRITE,
+        Permission.KNOWLEDGE_DELETE,
+        Permission.AGENT_READ,
+        Permission.AGENT_WRITE,
+        Permission.AGENT_EXECUTE,
+    ]),
+    MEMBER: frozenset([
         Permission.DEPT_READ,
         Permission.KNOWLEDGE_READ,
         Permission.KNOWLEDGE_WRITE,
@@ -65,7 +79,6 @@ PERMISSIONS: dict[Role, FrozenSet[Permission]] = {
         Permission.AGENT_WRITE,
     ]),
     VIEWER: frozenset([
-        Permission.USERS_READ,
         Permission.DEPT_READ,
         Permission.KNOWLEDGE_READ,
         Permission.AGENT_READ,
