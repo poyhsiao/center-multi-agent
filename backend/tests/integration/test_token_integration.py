@@ -88,3 +88,29 @@ async def test_blacklist_check(redis_client):
 
     with pytest.raises(TokenRevokedException):
         ts.refresh_tokens(result.refresh_token, "fp_test")
+
+
+@pytest.mark.asyncio
+async def test_invalid_jti_during_refresh(redis_client):
+    """Refresh with invalid/blacklisted jti should raise TokenRevokedException."""
+    from app.services.token_service import TokenService
+    from app.core.exceptions import TokenRevokedException
+    from app.db.redis import blacklist_refresh_token
+
+    ts = TokenService()
+    user_id = "user-invalid-jti"
+    device_id = "device-invalid-jti"
+    fingerprint = "fp_test"
+
+    # Create a valid token first
+    result = ts.create_tokens(user_id, "tenant-1", device_id, fingerprint)
+
+    # Extract jti from the refresh token
+    jti = extract_jti(result.refresh_token)
+
+    # Manually blacklist the jti to simulate invalid/expired scenario
+    blacklist_refresh_token(jti, ttl_seconds=3600)
+
+    # Try to use the now-blacklisted token - should raise TokenRevokedException
+    with pytest.raises(TokenRevokedException):
+        ts.refresh_tokens(result.refresh_token, fingerprint)
