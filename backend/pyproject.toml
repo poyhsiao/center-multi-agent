@@ -5,8 +5,6 @@ description = "Center Multi-Agent Backend"
 authors = ["Kim Hsiao"]
 packages = [{include = "app"}]
 
-[tool.poetry.package-mode] = "disabled"
-
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.111.0"
