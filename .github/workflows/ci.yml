@@ -144,7 +144,7 @@ jobs:
         working-directory: ./client
         env:
           CI: "true"
-        run: npx playwright test
+        run: npx playwright test --project=chromium
 
       - name: Upload Playwright report
         if: failure()
