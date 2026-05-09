@@ -28,11 +28,11 @@ jobs:
 
       - name: Run ruff
         working-directory: ./backend
-        command: poetry run ruff check .
+        run: poetry run ruff check .
 
       - name: Run mypy
         working-directory: ./backend
-        command: poetry run mypy app/
+        run: poetry run mypy app/
 
   backend-test:
     name: Backend Tests
@@ -82,21 +82,21 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/center_multi_agent
           REDIS_URL: redis://localhost:6379/0
-        command: poetry run pytest tests/unit/ -v
+        run: poetry run pytest tests/unit/ -v
 
       - name: Run integration tests
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/center_multi_agent
           REDIS_URL: redis://localhost:6379/0
-        command: poetry run pytest tests/integration/ -v
+        run: poetry run pytest tests/integration/ -v
 
       - name: Run BDD tests
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/center_multi_agent
           REDIS_URL: redis://localhost:6379/0
-        command: poetry run behave
+        run: poetry run behave
 
   client-test:
     name: Client Tests
@@ -113,11 +113,11 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./client
-        command: npm ci
+        run: npm ci
 
       - name: Build client
         working-directory: ./client
-        command: npm run build
+        run: npm run build
 
   e2e-test:
     name: E2E Tests
@@ -149,17 +149,17 @@ jobs:
 
       - name: Install client dependencies
         working-directory: ./client
-        command: npm ci
+        run: npm ci
 
       - name: Install Playwright browsers
         working-directory: ./client
-        command: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
         working-directory: ./client
         env:
           CI: "true"
-        command: npx playwright test
+        run: npx playwright test
 
       - name: Upload Playwright report
         if: failure()
