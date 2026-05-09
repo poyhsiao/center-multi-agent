@@ -8,6 +8,7 @@ from app.core.rbac import ADMIN, Role, Permission
 from app.models.user import User
 from app.schemas.user import UserResponse, RoleUpdate, UserListResponse, UserRoleResponse
 from app.db.database import get_db
+from sqlalchemy import select
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -23,7 +24,6 @@ async def list_users(
     List all users in an organization.
     Requires admin role.
     """
-    from sqlalchemy import select
     stmt = select(User).where(User.org_id == org_id)
     result = await db.execute(stmt)
     users = result.scalars().all()
