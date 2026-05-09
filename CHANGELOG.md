@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-09
+
+### Added
+- **LLM Gateway Model Router** - TaskType-based model selection with failover chains
+- **Embedding Service** - OpenAI text-embedding-3-small integration
+- **PGVector Operations** - VectorStore for knowledge chunk storage and similarity search
+- **RBAC MANAGER Role** - Full 4-role system with spec-compliant permissions
+
+### Changed
+- **RBAC Permission Matrix** - Fixed MEMBER/VIEWER permissions per spec Section 3.2
+- **Departments Router** - Registered in main.py with RBAC enforcement
+- **Integration Tests** - Redis RT rotation/blacklist tests, auth flow tests
+
+### Fixed
+- **MANAGER Role Missing** - Added to Role enum, ROLE_HIERARCHY, and PERMISSIONS
+- **Member Permissions** - Removed users:read/write per spec
+- **Viewer Permissions** - Removed knowledge:write per spec
+
 ## [0.3.0] - 2026-05-08
 
 ### Added

@@ -4,6 +4,7 @@ import { getStoredAuth, clearAuth, AuthState } from '../lib/auth';
 export interface AuthContextType {
   auth: AuthState | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   logout: () => void;
 }
 
@@ -11,6 +12,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<AuthState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Restore auth state from localStorage on mount
@@ -18,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) {
       setAuth(stored);
     }
+    setIsLoading(false);
   }, []);
 
   const logout = () => {
@@ -26,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, isAuthenticated: !!auth?.accessToken, logout }}>
+    <AuthContext.Provider value={{ auth, isAuthenticated: !!auth?.accessToken, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

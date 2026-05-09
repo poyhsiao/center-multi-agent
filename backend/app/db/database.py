@@ -34,6 +34,14 @@ async def get_session(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]
         yield session
 
 
+# Dependency for FastAPI - uses default engine
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency to get database session."""
+    engine = create_async_engine()
+    async with AsyncSession(engine) as session:
+        yield session
+
+
 async def init_db(engine: AsyncEngine) -> None:
     """Initialize database tables."""
     async with engine.begin() as conn:

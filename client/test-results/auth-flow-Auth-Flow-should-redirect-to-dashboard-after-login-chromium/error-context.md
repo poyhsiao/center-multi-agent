@@ -12,26 +12,7 @@
 # Error details
 
 ```
-TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
-=========================== logs ===========================
-waiting for navigation until "load"
-============================================================
-```
-
-# Page snapshot
-
-```yaml
-- generic [ref=e4]:
-  - heading "Sign In" [level=1] [ref=e5]
-  - generic [ref=e6]:
-    - generic [ref=e7]:
-      - generic [ref=e8]: Email
-      - textbox "Email" [ref=e9]: test@example.com
-    - generic [ref=e10]:
-      - generic [ref=e11]: Password
-      - textbox "Password" [ref=e12]: ValidPassword123
-    - generic [ref=e13]: Invalid email or password
-    - button "Sign In" [ref=e14] [cursor=pointer]
+Error: page.goto: Target page, context or browser has been closed
 ```
 
 # Test source
@@ -42,16 +23,16 @@ waiting for navigation until "load"
   3  | test.describe('Auth Flow', () => {
   4  |   test('should show login page when unauthenticated', async ({ page }) => {
   5  |     await page.goto('/');
-  6  |     await expect(page.locator('h1')).toContainText('Login');
+  6  |     await expect(page.locator('h1')).toContainText('Sign In');
   7  |   });
   8  | 
   9  |   test('should redirect to dashboard after login', async ({ page }) => {
-  10 |     await page.goto('/login');
+> 10 |     await page.goto('/login');
+     |                ^ Error: page.goto: Target page, context or browser has been closed
   11 |     await page.fill('[name="email"]', 'test@example.com');
   12 |     await page.fill('[name="password"]', 'ValidPassword123');
   13 |     await page.click('[type="submit"]');
-> 14 |     await page.waitForURL(/\/dashboard/, { timeout: 10000 });
-     |                ^ TimeoutError: page.waitForURL: Timeout 10000ms exceeded.
+  14 |     await page.waitForURL(/\/dashboard/, { timeout: 10000 });
   15 |   });
   16 | 
   17 |   test('should redirect to login after logout', async ({ page }) => {
@@ -60,9 +41,15 @@ waiting for navigation until "load"
   20 |     await page.fill('[name="email"]', 'test@example.com');
   21 |     await page.fill('[name="password"]', 'ValidPassword123');
   22 |     await page.click('[type="submit"]');
-  23 |     // Then logout
-  24 |     await page.click('[data-testid="logout-btn"]');
-  25 |     await expect(page).toHaveURL(/\/login/);
-  26 |   });
-  27 | });
+  23 |     await page.waitForURL(/\/dashboard/, { timeout: 10000 });
+  24 | 
+  25 |     // Click Settings tab to reveal logout button
+  26 |     await page.click('button:has-text("Settings")');
+  27 |     await page.waitForSelector('[data-testid="logout-btn"]', { timeout: 5000 });
+  28 | 
+  29 |     // Then logout
+  30 |     await page.click('[data-testid="logout-btn"]');
+  31 |     await expect(page).toHaveURL(/\/login/);
+  32 |   });
+  33 | });
 ```

@@ -12,36 +12,7 @@
 # Error details
 
 ```
-Error: expect(locator).toContainText(expected) failed
-
-Locator: locator('h1')
-Expected substring: "Login"
-Received string:    "Sign In"
-Timeout: 5000ms
-
-Call log:
-  - Expect "toContainText" with timeout 5000ms
-  - waiting for locator('h1')
-    - waiting for" http://localhost:1420/login" navigation to finish...
-    - navigated to "http://localhost:1420/login"
-    7 × locator resolved to <h1>Sign In</h1>
-      - unexpected value "Sign In"
-
-```
-
-# Page snapshot
-
-```yaml
-- generic [ref=e4]:
-  - heading "Sign In" [level=1] [ref=e5]
-  - generic [ref=e6]:
-    - generic [ref=e7]:
-      - generic [ref=e8]: Email
-      - textbox "Email" [ref=e9]
-    - generic [ref=e10]:
-      - generic [ref=e11]: Password
-      - textbox "Password" [ref=e12]
-    - button "Sign In" [ref=e13] [cursor=pointer]
+Error: page.goto: Target page, context or browser has been closed
 ```
 
 # Test source
@@ -51,9 +22,9 @@ Call log:
   2  | 
   3  | test.describe('Auth Flow', () => {
   4  |   test('should show login page when unauthenticated', async ({ page }) => {
-  5  |     await page.goto('/');
-> 6  |     await expect(page.locator('h1')).toContainText('Login');
-     |                                      ^ Error: expect(locator).toContainText(expected) failed
+> 5  |     await page.goto('/');
+     |                ^ Error: page.goto: Target page, context or browser has been closed
+  6  |     await expect(page.locator('h1')).toContainText('Sign In');
   7  |   });
   8  | 
   9  |   test('should redirect to dashboard after login', async ({ page }) => {
@@ -70,9 +41,15 @@ Call log:
   20 |     await page.fill('[name="email"]', 'test@example.com');
   21 |     await page.fill('[name="password"]', 'ValidPassword123');
   22 |     await page.click('[type="submit"]');
-  23 |     // Then logout
-  24 |     await page.click('[data-testid="logout-btn"]');
-  25 |     await expect(page).toHaveURL(/\/login/);
-  26 |   });
-  27 | });
+  23 |     await page.waitForURL(/\/dashboard/, { timeout: 10000 });
+  24 | 
+  25 |     // Click Settings tab to reveal logout button
+  26 |     await page.click('button:has-text("Settings")');
+  27 |     await page.waitForSelector('[data-testid="logout-btn"]', { timeout: 5000 });
+  28 | 
+  29 |     // Then logout
+  30 |     await page.click('[data-testid="logout-btn"]');
+  31 |     await expect(page).toHaveURL(/\/login/);
+  32 |   });
+  33 | });
 ```

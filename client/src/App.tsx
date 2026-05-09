@@ -10,10 +10,13 @@ interface RouteGuardProps {
 }
 
 function RouteGuard({ children, requiresAuth, redirectTo }: RouteGuardProps) {
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, isLoading } = useAuthContext();
   const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
+    // Wait for auth state to finish loading before redirecting
+    if (isLoading) return;
+
     if (requiresAuth && !isAuthenticated && !hasRedirected) {
       window.location.href = redirectTo;
       setHasRedirected(true);
@@ -21,9 +24,9 @@ function RouteGuard({ children, requiresAuth, redirectTo }: RouteGuardProps) {
       window.location.href = redirectTo;
       setHasRedirected(true);
     }
-  }, [requiresAuth, isAuthenticated, hasRedirected, redirectTo]);
+  }, [requiresAuth, isAuthenticated, hasRedirected, redirectTo, isLoading]);
 
-  if (hasRedirected) {
+  if (isLoading || hasRedirected) {
     return null;
   }
 

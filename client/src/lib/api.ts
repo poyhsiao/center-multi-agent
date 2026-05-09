@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface LoginRequest {
   email: string;
@@ -17,7 +17,10 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
+    body: JSON.stringify({
+      email: request.email,
+      password: request.password,
+    }),
   });
 
   if (!response.ok) {

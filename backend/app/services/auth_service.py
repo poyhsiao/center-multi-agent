@@ -153,6 +153,65 @@ class UserRepository:
         raise NotImplementedError
 
 
+async def authenticate_user_async(
+    credentials: LoginCredentials,
+    session: "AsyncSession",
+) -> LoginResult:
+    """
+    Authenticate user with email/password and optional TOTP (async version).
+
+    Args:
+        credentials: Login credentials including email, password, fingerprint
+        session: SQLAlchemy AsyncSession for database access
+
+    Returns:
+        LoginResult with access and refresh tokens
+
+    Raises:
+        InvalidCredentialsException: If credentials are invalid
+        TOTPRequiredException: If TOTP is enabled but code not provided
+    """
+    from sqlalchemy import select
+    from app.models.user import User
+
+    # Find user by email
+    stmt = select(User).where(User.email == credentials.email)
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise InvalidCredentialsException()
+
+    # Verify password
+    if not verify_password(credentials.password, user.password_hash):
+        raise InvalidCredentialsException()
+
+    # Check TOTP if enabled
+    if user.totp_enabled:
+        if not credentials.totp_code:
+            raise TOTPRequiredException()
+
+        if not verify_totp(credentials.totp_code, user.totp_secret):
+            raise InvalidCredentialsException()
+
+    # Create tokens via TokenService
+    token_service = TokenService()
+    device_id = "device_" + credentials.device_fingerprint[:8]
+
+    tokens = token_service.create_tokens(
+        user_id=str(user.id),
+        tenant_id=str(user.org_id),
+        device_id=device_id,
+        fingerprint=credentials.device_fingerprint,
+    )
+
+    return LoginResult(
+        access_token=tokens.access_token,
+        refresh_token=tokens.refresh_token,
+        expires_in=tokens.expires_in,
+    )
+
+
 def authenticate_user(credentials: LoginCredentials) -> LoginResult:
     """
     Authenticate user with email/password and optional TOTP.

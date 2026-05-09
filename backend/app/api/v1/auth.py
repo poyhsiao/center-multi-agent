@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import verify_access_token, extract_standard_claims
 from app.core.fingerprint import generate_fingerprint
@@ -13,8 +14,15 @@ from app.core.exceptions import (
     TokenRevokedException,
     FingerprintMismatchException,
 )
-from app.services.auth_service import authenticate_user, LoginCredentials
+from app.db.database import get_db
+from app.services.auth_service import authenticate_user_async, LoginCredentials
 from app.services.token_service import TokenService
+
+from pydantic import BaseModel
+
+class SimpleLoginRequest(BaseModel):
+    email: str
+    password: str
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -70,6 +78,7 @@ async def get_current_user_id(
 @router.post("/token")
 async def login(
     form_data: Annotated[TOTPRequestForm, Depends()],
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     OAuth2 login endpoint.
@@ -77,12 +86,20 @@ async def login(
     Returns access_token and refresh_token on successful authentication.
     Supports optional TOTP code for 2FA.
     """
+    # Debug: log form data
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(f"TOTPRequestForm data: username={form_data.username}, has password={bool(form_data.password)}")
+
     # Generate fingerprint from user agent
-    fingerprint = generate_fingerprint(
-        user_agent=form_data.scopes[0] if form_data.scopes else "",
-        client_version=form_data.scopes[1] if len(form_data.scopes) > 1 else "1.0.0",
-        client_type=form_data.scopes[2] if len(form_data.scopes) > 2 else "web",
-    )
+    try:
+        fingerprint = generate_fingerprint(
+            user_agent=form_data.scopes[0] if form_data.scopes else "",
+            client_version=form_data.scopes[1] if len(form_data.scopes) > 1 else "1.0.0",
+            client_type=form_data.scopes[2] if len(form_data.scopes) > 2 else "web",
+        )
+    except Exception:
+        fingerprint = "unknown"
 
     credentials = LoginCredentials(
         email=form_data.username,
@@ -92,7 +109,7 @@ async def login(
     )
 
     try:
-        result = authenticate_user(credentials)
+        result = await authenticate_user_async(credentials, db)
         return {
             "access_token": result.access_token,
             "refresh_token": result.refresh_token,
@@ -104,6 +121,49 @@ async def login(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="TOTP code required",
             headers={"X-MFA-Required": "true"},
+        )
+    except InvalidCredentialsException:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
+
+
+@router.post("/login")
+async def login_json(
+    request: SimpleLoginRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    JSON-based login endpoint for client applications.
+    """
+    from app.core.fingerprint import generate_fingerprint
+
+    fingerprint = generate_fingerprint(
+        user_agent="web",
+        client_version="1.0.0",
+        client_type="web",
+    )
+
+    credentials = LoginCredentials(
+        email=request.email,
+        password=request.password,
+        device_fingerprint=fingerprint,
+        totp_code=None,
+    )
+
+    try:
+        result = await authenticate_user_async(credentials, db)
+        return {
+            "access_token": result.access_token,
+            "refresh_token": result.refresh_token,
+            "token_type": "bearer",
+            "expires_in": result.expires_in,
+        }
+    except TOTPRequiredException:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="TOTP code required",
         )
     except InvalidCredentialsException:
         raise HTTPException(

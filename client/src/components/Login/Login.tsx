@@ -17,7 +17,8 @@ export function Login() {
       // Generate a simple device fingerprint
       const fingerprint = navigator.userAgent + screen.width + screen.height;
       await performLogin(email, password, fingerprint);
-      // Auth context will update, App.tsx will redirect
+      // Redirect to dashboard after successful login
+      window.location.href = '/dashboard';
     } catch (err) {
       setError('Invalid email or password');
     } finally {
