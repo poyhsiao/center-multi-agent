@@ -45,7 +45,7 @@ logging_level = "WARNING"
 
 [tool.ruff]
 select = ["F", "E", "I"]
-ignore = ["F821", "F401"]
+ignore = ["F821", "F401", "E501"]
 
 [tool.ruff.per-file-ignores]
 "app/models/*.py" = ["F821"]
